@@ -37,12 +37,12 @@ export class Form<T> extends Component<IFormState> {
         });
     }
 
-    set valid(value: boolean) {
-        this._submit.disabled = !value;
+    set valid(valid: boolean) {
+        this._submit.disabled = !valid;
     }
 
-    set errors(value: string) {
-        this.setText(this._errors, value);
+    set errors(errors: string) {
+        this.setText(this._errors, errors);
     }
 
     render(state: Partial<T> & IFormState) {
@@ -50,6 +50,5 @@ export class Form<T> extends Component<IFormState> {
         super.render({valid, errors});
         Object.assign(this, inputs);
         return this.container;
-
     }
 }

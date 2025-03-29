@@ -1,9 +1,6 @@
+import { ICardActions } from "../../types";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
-
-interface ICardActions {
-  onClick: (event: MouseEvent) => void;
-}
 
 export interface ICard<T> {
   title: string;

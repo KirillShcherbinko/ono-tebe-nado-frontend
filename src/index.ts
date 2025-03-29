@@ -1,3 +1,5 @@
+import { Modal } from './components/common/Modal';
+import { Catalog } from './components/modules/Catalog/Catalog';
 import './scss/styles.scss';
 
 import {AuctionAPI} from "./components/AuctionAPI";
@@ -29,6 +31,8 @@ const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
 
 // Глобальные контейнеры
+const catalog = new Catalog(document.body);
+const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 
 // Переиспользуемые части интерфейса

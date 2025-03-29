@@ -3,7 +3,7 @@ import {ensureElement} from "../../utils/utils";
 import {IEvents} from "../base/events";
 
 interface IModalData {
-    content: HTMLElement;
+    content: HTMLElement | null;
 }
 
 export class Modal extends Component<IModalData> {
@@ -21,8 +21,8 @@ export class Modal extends Component<IModalData> {
         this._content.addEventListener('click', (event) => event.stopPropagation());
     }
 
-    set content(value: HTMLElement) {
-        this._content.replaceChildren(value);
+    set content(content: HTMLElement | null) {
+        if (content) this._content.replaceChildren(content);
     }
 
     open() {
