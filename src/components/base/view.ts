@@ -50,7 +50,7 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
         return this.elements[name] as T;
     }
 
-    protected select<T extends Partial<any, any, any, any>>(name: string, selector?: string, ClassType?: new (el: HTMLElement, name: string) => T): T {
+    protected select<T extends Partial<any, any, any, any>>(name: string, selector: string, ClassType?: new (el: HTMLElement, name: string) => T): T {
         if (!this.elements[name]) {
             const $el = this.ensure<HTMLElement>(selector);
             if (ClassType) {
@@ -142,7 +142,7 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
         return this;
     }
 
-    setContent(item?: PartialElement) {
+    setContent(item: PartialElement) {
         return this.append(item);
     }
 
@@ -165,7 +165,9 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
         return this.node.className.includes(className);
     }
 
-    public static factory<T extends Partial<any, any, any, any>>(this: new (el: unknown, name?: string) => T, el: unknown, data?: any, name?: string): T {
+    public static factory<T extends Partial<any, any, any, any>>(
+        this: new (el: any, name?: string) => T, el: any, data?: any, name?: string
+    ): T {
         const instance = new this(el, name);
         if (data) instance.render(data);
         return instance;
@@ -173,6 +175,9 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
 
     static clone<T>(templateId: string, data?: any, name?: string): T {
         const template = document.getElementById(templateId) as HTMLTemplateElement;
+        if (!template || !template.content.firstElementChild) {
+            throw new Error(`Template with ID "${templateId}" not found or empty.`);
+        }
         const element = template.content.firstElementChild.cloneNode(true);
         return this.factory(element, data, name) as T;
     }
