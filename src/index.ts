@@ -1,3 +1,5 @@
+import { CatalogItem } from './components/modules/Catalog/CatalogItem';
+import { AppState } from './components/models/AppStateModel';
 import { Modal } from './components/common/Modal';
 import { Catalog } from './components/modules/Catalog/Catalog';
 import './scss/styles.scss';
@@ -5,7 +7,9 @@ import './scss/styles.scss';
 import {AuctionAPI} from "./components/AuctionAPI";
 import {API_URL, CDN_URL} from "./utils/constants";
 import {EventEmitter} from "./components/base/events";
-import { ensureElement } from './utils/utils';
+import { cloneTemplate, ensureElement } from './utils/utils';
+import { CardModel } from './components/models/CardModel';
+import { ILot } from './types';
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -28,7 +32,7 @@ const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
 // Модель данных приложения
-
+const appState = new AppState({}, events);
 
 // Глобальные контейнеры
 const catalog = new Catalog(document.body);
@@ -40,16 +44,24 @@ const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
-
+events.on('catalog:changed', () => {
+    catalog.items = appState.catalog.items.map(item => {
+        const catalogItem = new CatalogItem(cloneTemplate(cardCatalogTemplate), {
+            onClick: () => events.emit('item:select', item)
+        });
+        return catalogItem.render({
+            title: item.title,
+            image: item.image,
+            description: item.about,
+            status: {
+                status: item.status,
+                label: ''
+            }, 
+        });
+    })
+})
 
 // Получаем лоты с сервера
 api.getLotList()
-    .then(result => {
-        // вместо лога поместите данные в модель
-        console.log(result);
-    })
-    .catch(err => {
-        console.error(err);
-    });
-
-
+    .then((lots) => {console.log(lots)})
+    .catch(err => console.error(err));
