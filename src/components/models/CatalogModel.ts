@@ -10,6 +10,10 @@ export class CatalogModel extends Model<ILot> {
     this.events.emit('catalog:changed');
   }
 
+  get items (): CardModel[] {
+    return this._items;
+  }
+
   get activeLots(): ILot[] {
     return this._items.filter(item => item.status === 'active' && item.isParticipate);
   }
@@ -18,7 +22,7 @@ export class CatalogModel extends Model<ILot> {
     return this._items.filter(item => item.status === 'closed' && item.isUserBid);
   }
 
-  findById(id: string): ILot | undefined {
+  findById(id: string): CardModel | undefined {
     return this._items.find(item => item.id === id);
   }
 }

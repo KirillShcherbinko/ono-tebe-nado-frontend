@@ -1,13 +1,6 @@
-import { ICardActions } from "../../types";
+import { ICard, ICardActions } from "../../types";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
-
-export interface ICard<T> {
-  title: string;
-  description?: string | string[];
-  image: string;
-  status: T;
-}
 
 export class Card<T> extends Component<ICard<T>> {
   protected _title: HTMLElement;
@@ -21,7 +14,7 @@ export class Card<T> extends Component<ICard<T>> {
     this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
     this._description = ensureElement<HTMLElement>(`.${blockName}__description`, container);
     this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
-    this._button = ensureElement<HTMLButtonElement>(`.${blockName}__button`, container);
+    this._button = ensureElement<HTMLButtonElement>(`.${blockName}__action`, container);
 
     if (actions) {
       if (this._button) {

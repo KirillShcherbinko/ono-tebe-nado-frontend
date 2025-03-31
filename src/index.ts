@@ -10,6 +10,7 @@ import {EventEmitter} from "./components/base/events";
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { CardModel } from './components/models/CardModel';
 import { ILot } from './types';
+import { CatalogModel } from './components/models/CatalogModel';
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -32,7 +33,8 @@ const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
 // Модель данных приложения
-const appState = new AppState({}, events);
+const appState = new AppState(events);
+const catalogModel = new CatalogModel({}, events);
 
 // Глобальные контейнеры
 const catalog = new Catalog(document.body);
@@ -47,7 +49,8 @@ const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 events.on('catalog:changed', () => {
     catalog.items = appState.catalog.items.map(item => {
         const catalogItem = new CatalogItem(cloneTemplate(cardCatalogTemplate), {
-            onClick: () => events.emit('item:select', item)
+            //onClick: () => events.emit('item:select', item)
+            onClick: () => console.log('good')
         });
         return catalogItem.render({
             title: item.title,
@@ -55,13 +58,17 @@ events.on('catalog:changed', () => {
             description: item.about,
             status: {
                 status: item.status,
-                label: ''
+                label: item.statusLabel
             }, 
         });
     })
 })
 
+events.on('card:select', (item: CardModel) => {
+    appState.setPreview(item);
+});
+
 // Получаем лоты с сервера
 api.getLotList()
-    .then((lots) => {console.log(lots)})
+    .then((lots: ILot[]) => {appState.catalog.items = lots; console.log(lots)})
     .catch(err => console.error(err));

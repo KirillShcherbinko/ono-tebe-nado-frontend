@@ -42,6 +42,25 @@ export interface IOrderResult {
 	id: string;
 }
 
+export interface ICard<T> {
+	title: string;
+	description?: string | string[];
+	image: string;
+	status: T;
+}
+
 export interface ICardActions {
 	onClick: (event: MouseEvent) => void;
+}
+
+export interface AuctionStatus {
+  status: string;
+  time: string;
+  label: string;
+  nextBid: number;
+  history: number[];
+}
+
+export interface IAuctionActions {
+	onSubmit: (price: number) => void;
 }
