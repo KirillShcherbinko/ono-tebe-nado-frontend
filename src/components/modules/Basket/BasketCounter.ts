@@ -10,7 +10,7 @@ export class BasketCounter extends Component<IBasketCounter> {
 
   constructor(container: HTMLElement) {
     super(container);
-    this._counter = ensureElement<HTMLElement>('.header-basket__counter');
+    this._counter = ensureElement<HTMLElement>('.header__basket-counter');
   }
 
   set counter(counter: number) {

@@ -1,6 +1,13 @@
+import { Wrapper } from './components/common/Wrapper';
+import { BasketCounter } from './components/modules/Basket/BasketCounter';
+import { BasketHeader } from './components/modules/Basket/BasketHeader';
+import { Basket } from './components/modules/Basket/Basket';
+import { BidItem } from './components/modules/Basket/BidItem';
+import { Order } from './components/modules/Order/Order';
 import { CatalogItem } from './components/modules/Catalog/CatalogItem';
 import { AppState } from './components/models/AppStateModel';
 import { Modal } from './components/common/Modal';
+import { Tabs } from './components/common/Tabs';
 import { Catalog } from './components/modules/Catalog/Catalog';
 import { Auction } from './components/modules/Auction/Auction';
 import { AuctionItem } from './components/modules/Auction/AuctionItem';
@@ -9,10 +16,9 @@ import './scss/styles.scss';
 import {AuctionAPI} from "./components/AuctionAPI";
 import {API_URL, CDN_URL} from "./utils/constants";
 import {EventEmitter} from "./components/base/events";
-import { cloneTemplate, ensureElement } from './utils/utils';
+import { cloneTemplate, createElement, ensureElement } from './utils/utils';
 import { CardModel } from './components/models/CardModel';
 import { ILot } from './types';
-import { CatalogModel } from './components/models/CatalogModel';
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -36,15 +42,26 @@ const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
 // Модель данных приложения
 const appState = new AppState(events);
-const catalogModel = new CatalogModel({}, events);
 
 // Глобальные контейнеры
+const basketCounter = new BasketCounter(document.body);
+const basketHeader = new BasketHeader(document.body, events);
 const catalog = new Catalog(document.body);
+const wrapper = new Wrapper(document.body);
+
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 
 // Переиспользуемые части интерфейса
-
+const bids = new Basket(cloneTemplate(bidsTemplate), events);
+const basket = new Basket(cloneTemplate(basketTemplate), events);
+const tabs = new Tabs(cloneTemplate(tabsTemplate), {
+    onClick: (name) => {
+        if (name === 'closed') events.emit('basket:open');
+        else events.emit('bids:open');
+    }
+});
+const order = new Order(cloneTemplate(orderTemplate), events);
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
@@ -122,6 +139,69 @@ events.on('preview:changed', (item: CardModel) => {
     } else {
         modal.close();
     }
+});
+
+events.on('auction:changed', () => {
+    basketCounter.counter = appState.catalog.closedLots.length;
+    bids.items = appState.catalog.activeLots.map((item: CardModel) => {
+        const bidItem = new BidItem(cloneTemplate(cardBasketTemplate), {
+            onClick: () => events.emit('preview:changed', item)
+        });
+        return bidItem.render({
+            title: item.title,
+            image: item.image,
+            status: {
+                status: item.isUserBid,
+                amount: item.price,
+            }
+        });
+    });
+    let total = 0;
+    basket.items = appState.catalog.closedLots.map((item: CardModel) => {
+        const bidItem = new BidItem(cloneTemplate(soldTemplate), {
+            onClick: (event) => {
+                const checkbox = event.target as HTMLInputElement;
+                const isIncluded = checkbox.checked;
+                appState.basket.toggleItem(item.id, isIncluded);
+                basket.total = appState.basket.getTotal(appState.catalog);
+                basket.selected = appState.basket.items;
+            }
+        });
+        return bidItem.render({
+            title: item.title,
+            image: item.image,
+            status: {
+                status: item.isUserBid,
+                amount: item.price,
+            }
+        });
+    });
+    basket.selected = appState.basket.items;
+    basket.total = total;
+})
+
+// Открыть активные лоты
+events.on('bids:open', () => {
+    modal.render({
+        content: createElement<HTMLElement>('div', {}, [
+            tabs.render({
+                selected: 'active'
+            }),
+            bids.render()
+        ])
+    });
+});
+
+// Открыть закрытые лоты
+events.on('basket:open', () => {
+    modal.render({
+        content: createElement<HTMLElement>('div', {}, [
+            tabs.render({
+                selected: 'closed'
+            }),
+            basket.render()
+        ])
+    });
 });
 
 // Получаем лоты с сервера

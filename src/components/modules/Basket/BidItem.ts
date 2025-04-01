@@ -5,18 +5,18 @@ import { ensureElement, formatNumber } from "../../../utils/utils";
 export class BidItem extends Card<BidStatus> {
   protected _status: HTMLElement;
   protected _amount: HTMLElement;
-  protected _selector: HTMLInputElement;
+  protected _selector?: HTMLInputElement;
 
   constructor(container: HTMLElement, actions?: ICardActions) {
     super('bid', container, actions);
 
     this._status = ensureElement<HTMLElement>('.bid__status', container);
     this._amount = ensureElement<HTMLElement>('.bid__amount', container);
-    this._selector = ensureElement<HTMLInputElement>('.bid__selector-input', container);
+    this._selector = container.querySelector(`.bid__selector-input`);
 
     if (!this._button && this._selector) {
-      this._selector.addEventListener('change', (evt: Event) => {
-        actions?.onClick?.(evt as Event & { target: HTMLInputElement });
+      this._selector.addEventListener('change', (evt: MouseEvent) => {
+        actions?.onClick?.(evt);
       });
     }
   }

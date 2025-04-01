@@ -12,9 +12,10 @@ export class Card<T> extends Component<ICard<T>> {
     super(container);
 
     this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
-    this._description = ensureElement<HTMLElement>(`.${blockName}__description`, container);
     this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
-    if (actions) this._button = ensureElement<HTMLButtonElement>(`.${blockName}__action`, container) || null;
+    this._button = container.querySelector(`.${blockName}__button`)
+      || container.querySelector(`.${blockName}__action`);
+    this._description = container.querySelector(`.${blockName}__description`);
 
     if (this._button) {
       this._button.addEventListener('click', actions.onClick);

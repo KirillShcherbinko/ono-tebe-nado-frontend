@@ -61,7 +61,7 @@ export interface ICard<T> {
 }
 
 export interface ICardActions {
-	onClick: (event: MouseEvent | Event & { target: HTMLInputElement }) => void;
+	onClick: (event: MouseEvent) => void;
 }
 
 export interface AuctionStatus {
@@ -74,4 +74,11 @@ export interface AuctionStatus {
 
 export interface IAuctionActions {
 	onSubmit: (price: number) => void;
+}
+
+export type TabState = {
+	selected: string
+};
+export type TabActions = {
+	onClick: (tab: string) => void
 }
