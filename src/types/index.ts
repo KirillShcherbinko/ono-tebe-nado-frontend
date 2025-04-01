@@ -34,6 +34,17 @@ export interface IOrder extends IOrderForm {
 
 export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
+export interface IBasket {
+	items: HTMLElement[];
+	total: number;
+	selected: string[];
+}
+
+export interface BidStatus {
+	status: boolean;
+	amount: number;
+}
+
 export interface IBid {
 	price: number;
 }
@@ -50,7 +61,7 @@ export interface ICard<T> {
 }
 
 export interface ICardActions {
-	onClick: (event: MouseEvent) => void;
+	onClick: (event: MouseEvent | Event & { target: HTMLInputElement }) => void;
 }
 
 export interface AuctionStatus {
