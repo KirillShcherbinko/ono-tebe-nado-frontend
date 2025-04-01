@@ -16,9 +16,4 @@ export class BasketModel extends Model<ILot> {
 	getTotal(catalog: CatalogModel) {
 		return this.items.reduce((sum, id) => sum + (catalog.findById(id)?.price || 0), 0);
 	}
-	
-	clear() {
-		this.items = [];
-		this.events.emit('basket:cleared');
-	}
 }

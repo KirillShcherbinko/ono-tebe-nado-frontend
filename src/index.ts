@@ -8,7 +8,7 @@ import { CatalogItem } from './components/modules/Catalog/CatalogItem';
 import { AppState } from './components/models/AppStateModel';
 import { Modal } from './components/common/Modal';
 import { Tabs } from './components/common/Tabs';
-import { Success } from './components/common/Success';
+import { Plug } from './components/common/Plug';
 import { Catalog } from './components/modules/Catalog/Catalog';
 import { Auction } from './components/modules/Auction/Auction';
 import { AuctionItem } from './components/modules/Auction/AuctionItem';
@@ -40,6 +40,7 @@ const tabsTemplate = ensureElement<HTMLTemplateElement>('#tabs');
 const soldTemplate = ensureElement<HTMLTemplateElement>('#sold');
 const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');
+const emptyTemplate = ensureElement<HTMLTemplateElement>('#empty');
 
 // Модель данных приложения
 const appState = new AppState(events);
@@ -206,6 +207,25 @@ events.on('bids:open', () => {
 
 // Открыть закрытые лоты
 events.on('basket:open', () => {
+    if (!appState.catalog.closedLots.length) {
+        const empty = new Plug(cloneTemplate(emptyTemplate), {
+            onClick: () => {
+                modal.close();
+            }
+        });
+    
+        modal.render({
+            content: createElement<HTMLElement>('div', {}, [
+                    tabs.render({
+                    selected: 'closed'
+                }),
+                empty.render({})
+            ])
+        });
+    
+        return;
+    }
+
     modal.render({
         content: createElement<HTMLElement>('div', {}, [
             tabs.render({
@@ -220,13 +240,14 @@ events.on('basket:open', () => {
 events.on('order:submit', () => {
     api.orderLots(appState.order.orderData)
         .then((result) => {
-            const success = new Success(cloneTemplate(successTemplate), {
+            const success = new Plug(cloneTemplate(successTemplate), {
                 onClick: () => {
                     modal.close();
-                    appState.basket.clear();
-                    events.emit('auction:changed');
                 }
             });
+            appState.clear();
+            basketCounter.counter = 0;
+            events.emit('catalog:changed');
 
             modal.render({
                 content: success.render({})

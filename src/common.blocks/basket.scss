@@ -11,7 +11,13 @@
   }
 
   &__item {
+    padding: 1rem;
+    border-radius: 40px;
+    transition: background-color 0.3s ease;
 
+    &:hover {
+      background-color:#EFF0F3;
+    }
   }
 
   &__actions {

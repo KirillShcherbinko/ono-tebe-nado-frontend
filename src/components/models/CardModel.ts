@@ -33,7 +33,10 @@ export class CardModel extends Model<ILot>{
     this.history = [...this.history.slice(1), price];
     this._lastBid = price;
 
-    if (price > (this.minPrice * 10)) this.status = 'closed';
+    if (price > (this.minPrice * 10)) {
+      this.status = 'closed';
+      this.datetime = dayjs(Date.now()).toString();
+    };
 
     this.emitChanges('auction:changed', { id: this.id, price });
   }

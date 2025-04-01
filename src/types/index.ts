@@ -84,10 +84,10 @@ export interface TabActions {
 	onClick: (tab: string) => void;
 }
 
-export interface ISuccess {
+export interface IPlug {
 	total: number;
 }
 
-export interface ISuccessActions {
+export interface IPlugActions {
 	onClick: () => void;
 }

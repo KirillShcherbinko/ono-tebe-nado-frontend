@@ -32,4 +32,11 @@ export class AppState extends Model<IAppState> {
     this.preview = item.id;
     this.events.emit('preview:changed', item);
   }
+
+  clear() {
+    this.order.orderData.items.forEach(id => {
+      this.basket.toggleItem(id, false);
+      this.catalog.findById(id).clearBid();
+    });
+  }
 }
