@@ -14,14 +14,10 @@ export class Card<T> extends Component<ICard<T>> {
     this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
     this._description = ensureElement<HTMLElement>(`.${blockName}__description`, container);
     this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
-    this._button = ensureElement<HTMLButtonElement>(`.${blockName}__action`, container);
+    if (actions) this._button = ensureElement<HTMLButtonElement>(`.${blockName}__action`, container) || null;
 
-    if (actions) {
-      if (this._button) {
-        this._button.addEventListener('click', actions.onClick);
-      } else {
-        container.addEventListener('click', actions.onClick);
-      }
+    if (this._button) {
+      this._button.addEventListener('click', actions.onClick);
     }
   }
 

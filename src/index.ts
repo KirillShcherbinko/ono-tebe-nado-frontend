@@ -2,6 +2,8 @@ import { CatalogItem } from './components/modules/Catalog/CatalogItem';
 import { AppState } from './components/models/AppStateModel';
 import { Modal } from './components/common/Modal';
 import { Catalog } from './components/modules/Catalog/Catalog';
+import { Auction } from './components/modules/Auction/Auction';
+import { AuctionItem } from './components/modules/Auction/AuctionItem';
 import './scss/styles.scss';
 
 import {AuctionAPI} from "./components/AuctionAPI";
@@ -46,11 +48,12 @@ const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
+
+// Изменения в каталоге
 events.on('catalog:changed', () => {
     catalog.items = appState.catalog.items.map(item => {
         const catalogItem = new CatalogItem(cloneTemplate(cardCatalogTemplate), {
-            //onClick: () => events.emit('item:select', item)
-            onClick: () => console.log('good')
+            onClick: () => events.emit('item:select', item)
         });
         return catalogItem.render({
             title: item.title,
@@ -64,8 +67,61 @@ events.on('catalog:changed', () => {
     })
 })
 
-events.on('card:select', (item: CardModel) => {
+// Выбрана карточка
+events.on('item:select', (item: CardModel) => {
     appState.setPreview(item);
+});
+
+// Изменен открытый выбранный лот
+events.on('preview:changed', (item: CardModel) => {
+    const showItem = (item: CardModel) => {
+        const card = new AuctionItem(cloneTemplate(cardPreviewTemplate));
+        const auction = new Auction(cloneTemplate(auctionTemplate), {
+            onSubmit: (price: number) => {
+                item.placeBid(price);
+                auction.render({
+                    status: item.status,
+                    time: item.timeStatus,
+                    label: item.auctionStatus,
+                    nextBid: item.nextBid,
+                    history: item.history
+                });
+            }
+        });
+
+        modal.render({
+            content: card.render({
+                title: item.title,
+                image: item.image,
+                description: item.description.split("\n"),
+                status: auction.render({
+                    status: item.status,
+                    time: item.timeStatus,
+                    label: item.auctionStatus,
+                    nextBid: item.nextBid,
+                    history: item.history
+                })
+            })
+        });
+
+        if (item.status === 'active') {
+            auction.focus();
+        }
+    };
+
+    if (item) {
+        api.getLotItem(item.id)
+            .then((result) => {
+                item.description = result.description;
+                item.history = result.history;
+                showItem(item);
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+    } else {
+        modal.close();
+    }
 });
 
 // Получаем лоты с сервера
