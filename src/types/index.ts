@@ -76,9 +76,18 @@ export interface IAuctionActions {
 	onSubmit: (price: number) => void;
 }
 
-export type TabState = {
-	selected: string
-};
-export type TabActions = {
-	onClick: (tab: string) => void
+export interface TabState {
+	selected: string;
+}
+
+export interface TabActions {
+	onClick: (tab: string) => void;
+}
+
+export interface ISuccess {
+	total: number;
+}
+
+export interface ISuccessActions {
+	onClick: () => void;
 }

@@ -8,6 +8,7 @@ import { CatalogItem } from './components/modules/Catalog/CatalogItem';
 import { AppState } from './components/models/AppStateModel';
 import { Modal } from './components/common/Modal';
 import { Tabs } from './components/common/Tabs';
+import { Success } from './components/common/Success';
 import { Catalog } from './components/modules/Catalog/Catalog';
 import { Auction } from './components/modules/Auction/Auction';
 import { AuctionItem } from './components/modules/Auction/AuctionItem';
@@ -18,7 +19,7 @@ import {API_URL, CDN_URL} from "./utils/constants";
 import {EventEmitter} from "./components/base/events";
 import { cloneTemplate, createElement, ensureElement } from './utils/utils';
 import { CardModel } from './components/models/CardModel';
-import { ILot } from './types';
+import { ILot, IOrderForm } from './types';
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -65,6 +66,15 @@ const order = new Order(cloneTemplate(orderTemplate), events);
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
+// Блокируем прокрутку страницы если открыта модалка
+events.on('modal:open', () => {
+    wrapper.locked = true;
+});
+
+// ... и разблокируем
+events.on('modal:close', () => {
+    wrapper.locked = false;
+});
 
 // Изменения в каталоге
 events.on('catalog:changed', () => {
@@ -141,6 +151,7 @@ events.on('preview:changed', (item: CardModel) => {
     }
 });
 
+// Зафиксировать изменения в корзине
 events.on('auction:changed', () => {
     basketCounter.counter = appState.catalog.closedLots.length;
     bids.items = appState.catalog.activeLots.map((item: CardModel) => {
@@ -163,6 +174,7 @@ events.on('auction:changed', () => {
                 const checkbox = event.target as HTMLInputElement;
                 const isIncluded = checkbox.checked;
                 appState.basket.toggleItem(item.id, isIncluded);
+                appState.order.orderData.items = appState.basket.items; 
                 basket.total = appState.basket.getTotal(appState.catalog);
                 basket.selected = appState.basket.items;
             }
@@ -204,7 +216,54 @@ events.on('basket:open', () => {
     });
 });
 
+// Отправлена форма заказа
+events.on('order:submit', () => {
+    api.orderLots(appState.order.orderData)
+        .then((result) => {
+            const success = new Success(cloneTemplate(successTemplate), {
+                onClick: () => {
+                    modal.close();
+                    appState.basket.clear();
+                    events.emit('auction:changed');
+                }
+            });
+
+            modal.render({
+                content: success.render({})
+            });
+        })
+        .catch(err => {
+            console.error(err);
+        });
+});
+
+// Изменилось состояние валидации формы
+events.on('formErrors:change', (errors: Partial<IOrderForm>) => {
+    const { email, phone } = errors;
+    order.valid = !email && !phone;
+    order.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
+});
+
+// Изменилось одно из полей
+events.on(/^order\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
+    appState.order.setField(data.field, data.value);
+    appState.form.validate(appState.order.orderData);
+    console.log(appState.order.orderData);
+});
+
+// Открыть форму заказа
+events.on('order:open', () => {
+    modal.render({
+        content: order.render({
+            phone: '',
+            email: '',
+            valid: false,
+            errors: []
+        })
+    });
+});
+
 // Получаем лоты с сервера
 api.getLotList()
-    .then((lots: ILot[]) => {appState.catalog.items = lots; console.log(lots)})
+    .then((lots: ILot[]) => appState.catalog.items = lots)
     .catch(err => console.error(err));

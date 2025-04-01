@@ -8,7 +8,7 @@ export class FormModel extends Model<ILot> {
     this.errors = {};
     if (!order.email) this.errors.email = 'Необходимо указать email';
     if (!order.phone) this.errors.phone = 'Необходимо указать телефон';
-    this.events.emit('formErrors:updated', this.errors);
+    this.events.emit('formErrors:change', this.errors);
     return Object.keys(this.errors).length === 0;
   }
 }

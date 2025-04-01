@@ -1,8 +1,6 @@
 import { ILot } from './../../types/index';
 import { Model } from '../base/Model';
 import _ from 'lodash';
-import { CardModel } from './CardModel';
-import { CatalogItem } from '../modules/Catalog/CatalogItem';
 import { CatalogModel } from './CatalogModel';
 
 export class BasketModel extends Model<ILot> {
