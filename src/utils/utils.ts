@@ -3,6 +3,7 @@ import 'dayjs/locale/ru';
 import calendar from 'dayjs/plugin/calendar';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import parsePhoneNumberFromString from 'libphonenumber-js';
 
 dayjs.locale('ru');
 dayjs.extend(calendar);
@@ -186,4 +187,9 @@ export function makeObservable<T extends object>(obj: T, callback: Callback<T>):
             return success;
         },
     });
+}
+
+export function validatePhone(phone: string): boolean {
+	const phoneNumber = parsePhoneNumberFromString(phone, 'RU'); // RU — код страны
+	return phoneNumber ? phoneNumber.isValid() : false;
 }

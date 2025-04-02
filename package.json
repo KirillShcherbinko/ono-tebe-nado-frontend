@@ -42,12 +42,14 @@
     "lint": "eslint --ext .js,.ts ./src",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier ./src --write",
+    "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@types/lodash": "^4.14.202",
     "clsx": "^2.1.0",
     "dayjs": "^1.11.10",
+    "libphonenumber-js": "^1.12.6",
     "lodash": "^4.17.21"
   }
 }
